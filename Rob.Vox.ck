@@ -32,13 +32,13 @@ class Preset {
 // preset object "constructor"
 function Preset createPreset( float delayTime, float delayAmount, float pitchLevel, float pitchMix, float reverbAmount )
 {
-    Preset preset;
-    delayTime => preset.delayTime;
-    delayAmount => preset.delayAmount;
-    pitchLevel => preset.pitchLevel;
-    pitchMix => preset.pitchMix;
-    reverbAmount => preset.reverbAmount;
-    return preset;
+	Preset preset;
+	delayTime => preset.delayTime;
+	delayAmount => preset.delayAmount;
+	pitchLevel => preset.pitchLevel;
+	pitchMix => preset.pitchMix;
+	reverbAmount => preset.reverbAmount;
+	return preset;
 }
 
 // build custom preset objects
@@ -116,55 +116,55 @@ while( true )
 {
 	// run in a 5ms loop 
 	5::ms => now;
-    // detect the midi message
-    while( midiInput.recv(midiDataMsg) )
-    {
-        // print out incoming midi data
-        <<< "incoming MIDI data: ", midiDataMsg.data1, midiDataMsg.data2, midiDataMsg.data3 >>>;
-        
+	// detect the midi message
+	while( midiInput.recv(midiDataMsg) )
+	{
+		// print out incoming midi data
+		<<< "incoming MIDI data: ", midiDataMsg.data1, midiDataMsg.data2, midiDataMsg.data3 >>>;
 		
-        // set master gain
-        if( matchMidiKnobToMidiSignal( masterGainKnob, midiDataMsg ) == 1 )
-        {
-            getCurrentKnobValue( masterGainKnob, midiDataMsg ) => masterGain.gain;
-            <<< "masterVolKnob", getCurrentKnobValue( masterGainKnob, midiDataMsg ) >>>;
-        }
 		
-        // set pitch shift
-        if( matchMidiKnobToMidiSignal( pitchShiftKnob, midiDataMsg ) == 1 )
-        {
-            pitchShift.shift( getCurrentKnobValue( pitchShiftKnob, midiDataMsg ) );
-            <<< "pitchShiftVal", getCurrentKnobValue( pitchShiftKnob, midiDataMsg ) >>>;
-        }
+		// set master gain
+		if( matchMidiKnobToMidiSignal( masterGainKnob, midiDataMsg ) == 1 )
+		{
+			getCurrentKnobValue( masterGainKnob, midiDataMsg ) => masterGain.gain;
+			<<< "masterVolKnob", getCurrentKnobValue( masterGainKnob, midiDataMsg ) >>>;
+		}
 		
-        // set reverb
-        if( matchMidiKnobToMidiSignal( reverbKnob, midiDataMsg ) == 1 )
-        {
-            reverb.mix( getCurrentKnobValue( reverbKnob, midiDataMsg ) );
-            <<< "reverb mix = ", getCurrentKnobValue( reverbKnob, midiDataMsg ) >>>;
-        }
+		// set pitch shift
+		if( matchMidiKnobToMidiSignal( pitchShiftKnob, midiDataMsg ) == 1 )
+		{
+			pitchShift.shift( getCurrentKnobValue( pitchShiftKnob, midiDataMsg ) );
+			<<< "pitchShiftVal", getCurrentKnobValue( pitchShiftKnob, midiDataMsg ) >>>;
+		}
 		
-        // set delay mix
-        if( matchMidiKnobToMidiSignal( delayFeedbackKnob, midiDataMsg ) == 1 )
-        {
-            feedback.gain( getCurrentKnobValue( delayFeedbackKnob, midiDataMsg ) );
-            <<< "delay feedback = ", getCurrentKnobValue( delayFeedbackKnob, midiDataMsg ) >>>;
-        }
+		// set reverb
+		if( matchMidiKnobToMidiSignal( reverbKnob, midiDataMsg ) == 1 )
+		{
+			reverb.mix( getCurrentKnobValue( reverbKnob, midiDataMsg ) );
+			<<< "reverb mix = ", getCurrentKnobValue( reverbKnob, midiDataMsg ) >>>;
+		}
 		
-        // set delay time
-        if( matchMidiKnobToMidiSignal( delayTimeKnob, midiDataMsg ) == 1 )
-        {
+		// set delay mix
+		if( matchMidiKnobToMidiSignal( delayFeedbackKnob, midiDataMsg ) == 1 )
+		{
+			feedback.gain( getCurrentKnobValue( delayFeedbackKnob, midiDataMsg ) );
+			<<< "delay feedback = ", getCurrentKnobValue( delayFeedbackKnob, midiDataMsg ) >>>;
+		}
+		
+		// set delay time
+		if( matchMidiKnobToMidiSignal( delayTimeKnob, midiDataMsg ) == 1 )
+		{
 			getCurrentKnobValue( delayTimeKnob, midiDataMsg )::second => delay.max => delay.delay;
-            <<< "delay time = ", getCurrentKnobValue( delayTimeKnob, midiDataMsg ) >>>;
-        }
+			<<< "delay time = ", getCurrentKnobValue( delayTimeKnob, midiDataMsg ) >>>;
+		}
 		
 		// set preset
-        if( matchMidiKnobToMidiSignal( presetKnob, midiDataMsg ) == 1 )
-        {
+		if( matchMidiKnobToMidiSignal( presetKnob, midiDataMsg ) == 1 )
+		{
 			// get preset index by casting to int and thus rounding the knob value
-            getCurrentKnobValue( presetKnob, midiDataMsg ) $ int => int presetIndex;
+			getCurrentKnobValue( presetKnob, midiDataMsg ) $ int => int presetIndex;
 			applyPreset( presetIndex );
-            <<< "preset index: ", presetIndex >>>;
+			<<< "preset index: ", presetIndex >>>;
 		}
 	}
 }
