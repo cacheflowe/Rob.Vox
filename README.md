@@ -23,7 +23,5 @@ createMidiKnob( 177, 13, 0, 4 ) @=> MIDIKnob masterGainKnob;
 * If you add or remove presets, make sure to change the number 10 below.
 
 10 => int numPresets;
-
 createPreset( 0  , 0  , 1  , 1  , 0  ) @=> presetsArray[0]; // default - no effects
-
 createPreset( .05, .05, .90, 1 , .03 ) @=> presetsArray[1];
