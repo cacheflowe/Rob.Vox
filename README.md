@@ -22,7 +22,6 @@ createMidiKnob( 177, 13, 0, 4 ) @=> MIDIKnob masterGainKnob;
 * With the following code, you can create your own presets. Look at the createPreset() function for reference.
 * If you add or remove presets, make sure to change the number 10 below.
 
-// build custom preset objects
 10 => int numPresets;
 Preset presetsArray[ numPresets ];
 createPreset( 0  , 0  , 1  , 1  , 0  ) @=> presetsArray[0];
