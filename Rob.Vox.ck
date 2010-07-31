@@ -190,7 +190,7 @@ function float getCurrentKnobValue( MIDIKnob knob, MidiMsg midiData )
 function float convertMidiToPercent( float midiValue )
 {
 	midiValue / 127 => float percent;
-    return percent;
+	return percent;
 }
 
 
