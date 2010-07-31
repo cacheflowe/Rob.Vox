@@ -22,11 +22,11 @@ g => Gain feedback => DelayL delay => PitShift delayPitchShift => g;	// feedback
 
 // preset class
 class Preset { 
-    float delayTime; 
-    float delayAmount; 
-    float pitchLevel; 
-    float pitchMix; 
-    float reverbAmount; 
+	float delayTime; 
+	float delayAmount; 
+	float pitchLevel; 
+	float pitchMix; 
+	float reverbAmount; 
 }
 
 // preset object "constructor"
@@ -75,21 +75,21 @@ function void applyPreset( int presetIndex )
 
 // midi cc data object class
 class MIDIKnob { 
-    int midiIdOne; 
-    int midiIdTwo; 
-    float minValue; 
-    float maxValue; 
+	int midiIdOne; 
+	int midiIdTwo; 
+	float minValue; 
+	float maxValue; 
 }
 
 // midi knob object "constructor"
 function MIDIKnob createMidiKnob( int knobIdOne, int knobIdTwo, float minVal, float maxVal )
 {
-    MIDIKnob newKnob;
-    knobIdOne => newKnob.midiIdOne;
-    knobIdTwo => newKnob.midiIdTwo;
-    minVal => newKnob.minValue;
-    maxVal => newKnob.maxValue;
-    return newKnob;
+	MIDIKnob newKnob;
+	knobIdOne => newKnob.midiIdOne;
+	knobIdTwo => newKnob.midiIdTwo;
+	minVal => newKnob.minValue;
+	maxVal => newKnob.maxValue;
+	return newKnob;
 }
 
 // set up custom midi knobs
