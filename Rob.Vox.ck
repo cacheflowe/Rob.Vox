@@ -44,7 +44,7 @@ function Preset createPreset( float delayTime, float delayAmount, float pitchLev
 // build custom preset objects
 10 => int numPresets;
 Preset presetsArray[ numPresets ];
-createPreset( 0  , 0  , 1  , 1  , 0  ) @=> presetsArray[0];
+createPreset( 0  , 0  , 1  , 1  , 0  ) @=> presetsArray[0]; // default - no effects
 createPreset( .05, .05, .90, 1 , .03 ) @=> presetsArray[1];
 createPreset( .10, .78, 1.3, 1 , .01 ) @=> presetsArray[2];
 createPreset( .01, .78, 1.4, 1 , .01 ) @=> presetsArray[3];
