@@ -24,14 +24,25 @@ createMidiKnob( 177, 13, 0, 4 ) @=> MIDIKnob masterGainKnob;
 
 // build custom preset objects
 10 => int numPresets;
+
 Preset presetsArray[ numPresets ];
+
 createPreset( 0  , 0  , 1  , 1  , 0  ) @=> presetsArray[0];
+
 createPreset( .05, .05, .90, 1 , .03 ) @=> presetsArray[1];
+
 createPreset( .10, .78, 1.3, 1 , .01 ) @=> presetsArray[2];
+
 createPreset( .01, .78, 1.4, 1 , .01 ) @=> presetsArray[3];
+
 createPreset( .16, .78, 1.5, 1 , .02 ) @=> presetsArray[4];
+
 createPreset( .05, .61, 1.5, 1 , .02 ) @=> presetsArray[5];
+
 createPreset( .03, .48, 2.3, 1 , .04 ) @=> presetsArray[6];
+
 createPreset( .02, .94, .84, 1 , .02 ) @=> presetsArray[7];
+
 createPreset( .024,.87, 1.1, 1 , .03 ) @=> presetsArray[8];
+
 createPreset( .04, .81, 1.4, 1 , .04 ) @=> presetsArray[9];
