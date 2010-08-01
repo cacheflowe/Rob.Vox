@@ -127,14 +127,14 @@ while( true )
 		if( matchMidiKnobToMidiSignal( masterGainKnob, midiDataMsg ) == 1 )
 		{
 			getCurrentKnobValue( masterGainKnob, midiDataMsg ) => masterGain.gain;
-			<<< "masterVolKnob", getCurrentKnobValue( masterGainKnob, midiDataMsg ) >>>;
+			<<< "master input vol = ", getCurrentKnobValue( masterGainKnob, midiDataMsg ) >>>;
 		}
 		
 		// set pitch shift
 		if( matchMidiKnobToMidiSignal( pitchShiftKnob, midiDataMsg ) == 1 )
 		{
 			pitchShift.shift( getCurrentKnobValue( pitchShiftKnob, midiDataMsg ) );
-			<<< "pitchShiftVal", getCurrentKnobValue( pitchShiftKnob, midiDataMsg ) >>>;
+			<<< "pitch shift = ", getCurrentKnobValue( pitchShiftKnob, midiDataMsg ) >>>;
 		}
 		
 		// set reverb
@@ -164,7 +164,7 @@ while( true )
 			// get preset index by casting to int and thus rounding the knob value
 			getCurrentKnobValue( presetKnob, midiDataMsg ) $ int => int presetIndex;
 			applyPreset( presetIndex );
-			<<< "preset index: ", presetIndex >>>;
+			<<< "preset index = ", presetIndex >>>;
 		}
 	}
 }
