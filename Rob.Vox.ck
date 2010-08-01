@@ -1,17 +1,31 @@
 // ---------------------------------------------------------
-// Get MIDI input
+// Get all MIDI inputs
 // ---------------------------------------------------------
-0 => int device;
-if( me.args() ) me.arg(0) => Std.atoi => device;
-MidiIn midiInput;
-MidiMsg midiDataMsg;
-if( !midiInput.open( device ) ) me.exit();
-<<< "MIDI device:", midiInput.num(), " -> ", midiInput.name() >>>;
+
+// get number of devices, and load them up into arrays
+getNumberOfMidiInputDevices() => int numMidiDevices;
+<<< "Found", numMidiDevices, "MIDI devices" >>>;
+
+MidiIn midiInputs[numMidiDevices];
+MidiMsg midiDataMessages[numMidiDevices];
+
+for( 0 => int i; i < numMidiDevices; i++ )
+{
+	MidiIn midiInput;
+	MidiMsg midiDataMsg;
+	
+	if( midiInput.open( i ) ) {
+		<<< "Loaded MIDI device:", midiInput.num(), " -> ", midiInput.name() >>>;
+		midiInput @=> midiInputs[i];
+		midiDataMsg @=> midiDataMessages[i];
+	}
+}
 
 
 // ---------------------------------------------------------
 // Create audio signal path
 // ---------------------------------------------------------
+
 adc => Gain midiEnvGain => HPF highpassFilter => PitShift pitchShift => Dyno dyno => Gain g => JCRev reverb => Gain masterGain => dac;
 g => Gain feedback => DelayL delay => PitShift delayPitchShift => g;	// feedback for delay
 
@@ -73,7 +87,7 @@ function void applyPreset( int presetIndex )
 // Create MIDI knob objects 
 // ---------------------------------------------------------
 
-// midi cc data object class
+// midi cc data object class - handles
 class MIDIKnob { 
 	int midiIdOne; 
 	int midiIdTwo; 
@@ -116,55 +130,63 @@ while( true )
 {
 	// run in a 5ms loop 
 	5::ms => now;
-	// detect the midi message
-	while( midiInput.recv(midiDataMsg) )
+	// loop through midi devices
+	for( 0 => int i; i < numMidiDevices; i++ )
 	{
-		// print out incoming midi data
-		<<< "incoming MIDI data: ", midiDataMsg.data1, midiDataMsg.data2, midiDataMsg.data3 >>>;
-		
-		
-		// set master gain
-		if( matchMidiKnobToMidiSignal( masterGainKnob, midiDataMsg ) == 1 )
+		// get refs to midi device and data message
+		midiInputs[i] @=> MidiIn midiInput;
+		midiDataMessages[i] @=> MidiMsg midiDataMsg;
+
+		// detect the midi message
+		while( midiInput.recv( midiDataMsg ) )
 		{
-			getCurrentKnobValue( masterGainKnob, midiDataMsg ) => masterGain.gain;
-			<<< "master input vol = ", getCurrentKnobValue( masterGainKnob, midiDataMsg ) >>>;
-		}
-		
-		// set pitch shift
-		if( matchMidiKnobToMidiSignal( pitchShiftKnob, midiDataMsg ) == 1 )
-		{
-			pitchShift.shift( getCurrentKnobValue( pitchShiftKnob, midiDataMsg ) );
-			<<< "pitch shift = ", getCurrentKnobValue( pitchShiftKnob, midiDataMsg ) >>>;
-		}
-		
-		// set reverb
-		if( matchMidiKnobToMidiSignal( reverbKnob, midiDataMsg ) == 1 )
-		{
-			reverb.mix( getCurrentKnobValue( reverbKnob, midiDataMsg ) );
-			<<< "reverb mix = ", getCurrentKnobValue( reverbKnob, midiDataMsg ) >>>;
-		}
-		
-		// set delay mix
-		if( matchMidiKnobToMidiSignal( delayFeedbackKnob, midiDataMsg ) == 1 )
-		{
-			feedback.gain( getCurrentKnobValue( delayFeedbackKnob, midiDataMsg ) );
-			<<< "delay feedback = ", getCurrentKnobValue( delayFeedbackKnob, midiDataMsg ) >>>;
-		}
-		
-		// set delay time
-		if( matchMidiKnobToMidiSignal( delayTimeKnob, midiDataMsg ) == 1 )
-		{
-			getCurrentKnobValue( delayTimeKnob, midiDataMsg )::second => delay.max => delay.delay;
-			<<< "delay time = ", getCurrentKnobValue( delayTimeKnob, midiDataMsg ) >>>;
-		}
-		
-		// set preset
-		if( matchMidiKnobToMidiSignal( presetKnob, midiDataMsg ) == 1 )
-		{
-			// get preset index by casting to int and thus rounding the knob value
-			getCurrentKnobValue( presetKnob, midiDataMsg ) $ int => int presetIndex;
-			applyPreset( presetIndex );
-			<<< "preset index = ", presetIndex >>>;
+			// print out incoming midi data
+			<<< "incoming MIDI data: ", midiDataMsg.data1, midiDataMsg.data2, midiDataMsg.data3 >>>;
+			
+			
+			// set master gain
+			if( matchMidiKnobToMidiSignal( masterGainKnob, midiDataMsg ) == 1 )
+			{
+				getCurrentKnobValue( masterGainKnob, midiDataMsg ) => masterGain.gain;
+				<<< "master input vol = ", getCurrentKnobValue( masterGainKnob, midiDataMsg ) >>>;
+			}
+			
+			// set pitch shift
+			if( matchMidiKnobToMidiSignal( pitchShiftKnob, midiDataMsg ) == 1 )
+			{
+				pitchShift.shift( getCurrentKnobValue( pitchShiftKnob, midiDataMsg ) );
+				<<< "pitch shift = ", getCurrentKnobValue( pitchShiftKnob, midiDataMsg ) >>>;
+			}
+			
+			// set reverb
+			if( matchMidiKnobToMidiSignal( reverbKnob, midiDataMsg ) == 1 )
+			{
+				reverb.mix( getCurrentKnobValue( reverbKnob, midiDataMsg ) );
+				<<< "reverb mix = ", getCurrentKnobValue( reverbKnob, midiDataMsg ) >>>;
+			}
+			
+			// set delay mix
+			if( matchMidiKnobToMidiSignal( delayFeedbackKnob, midiDataMsg ) == 1 )
+			{
+				feedback.gain( getCurrentKnobValue( delayFeedbackKnob, midiDataMsg ) );
+				<<< "delay feedback = ", getCurrentKnobValue( delayFeedbackKnob, midiDataMsg ) >>>;
+			}
+			
+			// set delay time
+			if( matchMidiKnobToMidiSignal( delayTimeKnob, midiDataMsg ) == 1 )
+			{
+				getCurrentKnobValue( delayTimeKnob, midiDataMsg )::second => delay.max => delay.delay;
+				<<< "delay time = ", getCurrentKnobValue( delayTimeKnob, midiDataMsg ) >>>;
+			}
+			
+			// set preset
+			if( matchMidiKnobToMidiSignal( presetKnob, midiDataMsg ) == 1 )
+			{
+				// get preset index by casting to int and thus rounding the knob value
+				getCurrentKnobValue( presetKnob, midiDataMsg ) $ int => int presetIndex;
+				applyPreset( presetIndex );
+				<<< "preset index = ", presetIndex >>>;
+			}
 		}
 	}
 }
@@ -173,6 +195,19 @@ while( true )
 // ---------------------------------------------------------
 // Helper Functions 
 // ---------------------------------------------------------
+
+function int getNumberOfMidiInputDevices()
+{
+	0 => int numDevices;
+	for( 0 => int i; i < 99; i++ )
+	{
+		MidiIn midiDevice;		
+		if( midiDevice.open( i ) )
+			numDevices++;
+		else
+			return numDevices;
+	}
+}
 
 function int matchMidiKnobToMidiSignal( MIDIKnob knob, MidiMsg midiData )
 {
