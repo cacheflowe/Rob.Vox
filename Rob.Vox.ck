@@ -25,9 +25,10 @@ for( 0 => int i; i < numMidiDevices; i++ )
 // ---------------------------------------------------------
 // Create audio signal path
 // ---------------------------------------------------------
+// to re-implement: Gain midiEnvGain => , PitShift delayPitchShift => g
 
-adc => Gain midiEnvGain => HPF highpassFilter => PitShift pitchShift => Dyno dyno => Gain g => JCRev reverb => Gain masterGain => dac;
-g => Gain feedback => DelayL delay => PitShift delayPitchShift => g;	// feedback for delay
+adc => Dyno dyno => HPF highpassFilter => PitShift pitchShift => Gain g => Chorus chorus => JCRev reverb => Gain masterGain => dac;
+g => Gain feedback => DelayL delay => g;	// feedback for delay
 
 
 // ---------------------------------------------------------
@@ -41,10 +42,11 @@ class Preset {
 	float pitchLevel; 
 	float pitchMix; 
 	float reverbAmount; 
+	float chorusMix;
 }
 
 // preset object "constructor"
-function Preset createPreset( float delayTime, float delayAmount, float pitchLevel, float pitchMix, float reverbAmount )
+function Preset createPreset( float delayTime, float delayAmount, float pitchLevel, float pitchMix, float reverbAmount, float chorusMix )
 {
 	Preset preset;
 	delayTime => preset.delayTime;
@@ -52,22 +54,23 @@ function Preset createPreset( float delayTime, float delayAmount, float pitchLev
 	pitchLevel => preset.pitchLevel;
 	pitchMix => preset.pitchMix;
 	reverbAmount => preset.reverbAmount;
+	chorusMix => preset.chorusMix;
 	return preset;
 }
 
 // build custom preset objects
 10 => int numPresets;
 Preset presetsArray[ numPresets ];
-createPreset( 0  , 0  , 1  , 1  , 0  ) @=> presetsArray[0]; // default - no effects
-createPreset( .05, .05, .90, 1 , .03 ) @=> presetsArray[1];
-createPreset( .10, .78, 1.3, 1 , .01 ) @=> presetsArray[2];
-createPreset( .01, .78, 1.4, 1 , .01 ) @=> presetsArray[3];
-createPreset( .16, .78, 1.5, 1 , .02 ) @=> presetsArray[4];
-createPreset( .05, .61, 1.5, 1 , .02 ) @=> presetsArray[5];
-createPreset( .03, .48, 2.3, 1 , .04 ) @=> presetsArray[6];
-createPreset( .02, .94, .84, 1 , .02 ) @=> presetsArray[7];
-createPreset( .024,.87, 1.1, 1 , .03 ) @=> presetsArray[8];
-createPreset( .04, .81, 1.4, 1 , .04 ) @=> presetsArray[9];
+createPreset( 0  , 0  , 1  , 1  , 0 , 0 ) @=> presetsArray[0]; // default - no effects
+createPreset( .05, .05, .90, 1 , .03, 0 ) @=> presetsArray[1];
+createPreset( .10, .78, 1.3, 1 , .01, 0 ) @=> presetsArray[2];
+createPreset( .01, .78, 1.4, 1 , .01, 0 ) @=> presetsArray[3];
+createPreset( .16, .78, 1.5, 1 , .02, 0 ) @=> presetsArray[4];
+createPreset( .05, .61, 1.5, 1 , .02, 0 ) @=> presetsArray[5];
+createPreset( .03, .48, 2.3, 1 , .04, 0 ) @=> presetsArray[6];
+createPreset( .02, .94, .84, 1 , .02, 0 ) @=> presetsArray[7];
+createPreset( .024,.87, 1.1, 1 , .03, 0 ) @=> presetsArray[8];
+createPreset( .04, .81, 1.4, 1 , .04, 0 ) @=> presetsArray[9];
 
 // set all effects to a preset's defaults
 function void applyPreset( int presetIndex )
@@ -80,6 +83,7 @@ function void applyPreset( int presetIndex )
 	reverb.mix( curPreset.reverbAmount );
 	curPreset.delayTime::second => delay.max => delay.delay;
 	curPreset.delayAmount => feedback.gain;
+	chorus.mix( curPreset.chorusMix );
 }
 
 
@@ -113,15 +117,23 @@ createMidiKnob( 179, 13, 0.44, 4 ) @=> MIDIKnob pitchShiftKnob;
 createMidiKnob( 180, 13, 0, 1 ) @=> MIDIKnob delayFeedbackKnob;
 createMidiKnob( 181, 13, 0.03, 0.2 ) @=> MIDIKnob delayTimeKnob;
 createMidiKnob( 182, 13, 0, 0.2 ) @=> MIDIKnob reverbKnob;
-createMidiKnob( 182, 13, 0, 0.2 ) @=> MIDIKnob hpfKnob;
+createMidiKnob( 190, 31, 0, 1 ) @=> MIDIKnob chorusKnob;
 
 
 // ---------------------------------------------------------
 // Initialize 
 // ---------------------------------------------------------
-applyPreset(0);
-200 => highpassFilter.freq;
 
+// set default preset to initialize effects params
+applyPreset(0);
+// set hi pass filter to cut out crappy vocal low-end
+200 => highpassFilter.freq;
+// set up limiter
+dyno.limit();
+dyno.thresh ( 0.4 );
+// set up chorus
+chorus.modDepth( .1 );
+chorus.mix( 0.2 );
 
 // ---------------------------------------------------------
 // Audio Loop 
@@ -144,7 +156,7 @@ while( true )
 			<<< "incoming MIDI data: ", midiDataMsg.data1, midiDataMsg.data2, midiDataMsg.data3 >>>;
 			
 			
-			// set master gain
+			// set master input gain
 			if( matchMidiKnobToMidiSignal( masterGainKnob, midiDataMsg ) == 1 )
 			{
 				getCurrentKnobValue( masterGainKnob, midiDataMsg ) => masterGain.gain;
@@ -177,6 +189,13 @@ while( true )
 			{
 				getCurrentKnobValue( delayTimeKnob, midiDataMsg )::second => delay.max => delay.delay;
 				<<< "delay time = ", getCurrentKnobValue( delayTimeKnob, midiDataMsg ) >>>;
+			}
+			
+			// set chorus mix
+			if( matchMidiKnobToMidiSignal( chorusKnob, midiDataMsg ) == 1 )
+			{
+				chorus.mix( getCurrentKnobValue( chorusKnob, midiDataMsg ) );
+				<<< "chorus mix = ", getCurrentKnobValue( chorusKnob, midiDataMsg ) >>>;
 			}
 			
 			// set preset
