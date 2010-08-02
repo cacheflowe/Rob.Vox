@@ -5,9 +5,9 @@ Rob.Vox
 
 Requires [ChucK](http://chuck.cs.princeton.edu/) to run.
 
-Can turn your voice into robot vocals.
+Can turn your voice into robot vocals using pitch shift, delay, and reverb.
 
-There are 3 blocks of code you'll likely want to edit to enable your own MIDI device and to customize your own presets:
+There are 2 blocks of code you'll likely want to edit to enable your own MIDI device and to customize your own presets:
 
 #### MIDI Devices ####
 
@@ -32,4 +32,4 @@ createMidiKnob( 177, 13, 0, 4 ) @=> MIDIKnob masterGainKnob;
 
 createPreset( 0  , 0  , 1  , 1  , 0  ) @=> presetsArray[0]; // default - no effects
 
-createPreset( .05, .05, .90, 1 , .03 ) @=> presetsArray[1];
+createPreset( .024,.87, 1.1, 1 , .03 ) @=> presetsArray[8]; // fun robot effect
