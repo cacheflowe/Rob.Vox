@@ -133,7 +133,6 @@ dyno.limit();
 dyno.thresh ( 0.4 );
 // set up chorus
 chorus.modDepth( .1 );
-chorus.mix( 0.2 );
 
 // ---------------------------------------------------------
 // Audio Loop 
